@@ -3,6 +3,7 @@ yolox/data/datasets/train_seq.npy
 /annotations/
 /YOLOX_outputs
 /excluded
+/dataset
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
 
