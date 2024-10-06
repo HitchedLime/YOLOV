@@ -1,10 +1,10 @@
 numpy
-torch>=1.7.0
-opencv_python
+torch
+opencv-contrib-python
 loguru
 scikit-image
 tqdm
-torchvision>=0.10.0
+torchvision
 Pillow
 thop
 ninja
@@ -17,8 +17,7 @@ h5py
 scikit-learn
 
 
+
 # verified versions
-pycocotools>=2.0.2
-onnx==1.8.1
-onnxruntime==1.8.0
-onnx-simplifier==0.3.5
+pycocotools
+

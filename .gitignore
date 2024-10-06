@@ -3,7 +3,22 @@ yolox/data/datasets/train_seq.npy
 /annotations/
 /YOLOX_outputs
 /excluded
-/dataset
+/preprocessing/datasets/*
+/demo/*
+
+# Dataset files
+*.json
+*.jpg
+*.png
+*.txt
+*.csv
+*.npy
+*.ini
+*.mp4
+*.avi
+*.idl
+
+/weights
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
 
