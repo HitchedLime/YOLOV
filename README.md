@@ -3,10 +3,9 @@
 # YOLOV and YOLOV++ for video object detection.
 ## Update
 * **` July. 30th, 2024`**:  The pre-print version of the YOLOV++ paper is now available on [Arxiv](https://arxiv.org/abs/2407.19650).
-
+* **` May. 8th, 2024`**:  We release code, log and weights for YOLOV++.
 * **` April. 21th, 2024`**:  Our enhanced model now achieves a 92.9 AP50(w.o post-processing) on the ImageNet VID dataset, thanks to a more robust backbone and algorithm improvements. It maintains a processing time of 26.5ms per image during batch inference on a 3090 GPU. Code release is forthcoming.
 
-* **` May. 8th, 2024`**:  We release code, log and weights for YOLOV++.
 
 ## Introduction
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/practical-video-object-detection-via-feature/video-object-detection-on-imagenet-vid)](https://paperswithcode.com/sota/video-object-detection-on-imagenet-vid?p=practical-video-object-detection-via-feature)
@@ -168,6 +167,58 @@ numpy.load('./yolox/data/datasets/train_seq.npy',allow_pickle=True)
 ```
 Each list contains the paths to all images in a video. The specific annotations(xml annotation in VID dataset) are loaded via these image paths, refer to https://github.com/YuHengsss/YOLOV/blob/f5a57ddea2f3660875d6d75fc5fa2ddbb95028a7/yolox/data/datasets/vid.py#L125 for more details.
 
+</details>
+
+
+## Training on Custom Datasets
+
+<details>
+<summary> <b>Details</b> </summary>
+  
+1. Finetuing the base detector(YOLOX) on your custom dataset with COCO format annotation. You need to modify the YOLOX experiment file. For instance, the experiment file for the Imagenet VID dataset is modified as [this example](https://github.com/YuHengsss/YOLOV/blob/master/exps/swin_base/swin_tiny_vid.py). Initialized weights with COCO pretraining is essential for the performance, you can find these coco pretrained weights in YOLOX official repo (YOLOX-S~YOLOX-X) and this [huggingface repo](https://huggingface.co/YuhengSSS/YOLOV/tree/main) (YOLOX-SwinTiny and SwinBase).
+
+
+2. Construct your dataset in the COCO format. Here is a template for the dataset structure (sourced from [OVIS](https://songbai.site/ovis/)):
+    ```shell
+    {
+    "info" : info,
+    "videos" : [video],
+    "annotations" : [annotation] or None,
+    "categories" : [category],
+    }
+    video{
+        "id" : int,
+        "width" : int,
+        "height" : int,
+        "length" : int,
+        "file_names" : [file_name],
+    }
+    annotation{
+        "id" : int, 
+        "video_id" : int, 
+        "category_id" : int, 
+        "areas" : [float or None], 
+        "bboxes" : [[x,y,width,height] or None], 
+        "iscrowd" : 0 or 1,
+    }
+    category{
+        "id" : int, 
+        "name" : str, 
+        "supercategory" : str,
+    }
+    ```
+
+    After preparing the COCO format dataset, we provide [code](https://github.com/YuHengsss/YOLOV/blob/8873e06cac9912c60c31ca2ef3061d0bfe5b2f36/yolox/data/datasets/ovis.py#L238) which converts the COCO format annotation for video object detection.
+    You can construct your experiment file for YOLOV such as [YOLOVs_OVIS](https://github.com/YuHengsss/YOLOV/blob/master/exps/yolov_ovis/yolovs_ovis_75_75_750.py). 
+    For YOLOV++, please refer example in *exps/customed_example/v++_SwinTiny_example.py*, please config the OVIS in the *get_data_loader* and *get_eval_loader* according to your own dataset. 
+    Remember to change the category information in the [evaluator](https://github.com/YuHengsss/YOLOV/blob/98ade28ce975291023be947b7d5d57b05f9600ba/yolox/evaluators/vid_evaluator_v2.py#L41).
+
+3. Initialize the YOLOV or YOLOV++ with finetuned weights obtained by Step 1. You may adjust the hyperparameters such as [proposal numbers](https://github.com/YuHengsss/YOLOV/blob/8873e06cac9912c60c31ca2ef3061d0bfe5b2f36/exps/yolov_ovis/yolovs_ovis_75_75_750.py#L56) according to your dataset for getting better performance:
+    
+     ```shell
+     python tools/vid_train.py -f exps/customed_example/v++_SwinTiny_example.py -c [path to your weights] --fp16
+     ```
+     Note that the batch size when training video detector is determined by the lframe and gframe, refer to this [line](https://github.com/YuHengsss/YOLOV/blob/98ade28ce975291023be947b7d5d57b05f9600ba/exps/yolov/yolov_base.py#L320). You can adjust the batch size according to your GPU memory. However, a very small batch size (<4) may lead to poor performance.
 </details>
 
 ## Acknowledgements
