@@ -2,6 +2,7 @@
 # -*- coding:utf-8 -*-
 # Copyright (c) Megvii, Inc. and its affiliates.
 import copy
+import json
 import os
 import random
 
@@ -11,10 +12,13 @@ from loguru import logger
 import cv2
 import numpy as np
 import torch
+from pycocotools.coco import COCO
 from torch.utils.data.dataset import Dataset as torchDataset
 from torch.utils.data.sampler import Sampler,BatchSampler,SequentialSampler
 from xml.dom import minidom
 import math
+
+from yolox.data.datasets.ovis import remove_useless_info
 from yolox.utils import xyxy2cxcywh
 
 IMAGE_EXT = [".jpg", ".jpeg", ".webp", ".bmp", ".png",".JPEG"]
@@ -278,7 +282,7 @@ class Arg_VID(torchDataset):
         with open(self.coco_anno_path,'r') as train_anno_content:
             train_anno_content = json.load(train_anno_content)
             for im in train_anno_content['images']:
-                img_dic[im['name']] = im['id']
+                img_dic[im['file_name']] = im['id']
         return img_dic
 
     def _load_coco_annotations(self):
@@ -447,11 +451,13 @@ class OVIS(Arg_VID):
         annotations = self.coco.loadAnns(anno_ids)
         objs = []
         for obj in annotations:
-            x1 = np.max((0, obj["bbox"][0]))
-            y1 = np.max((0, obj["bbox"][1]))
-            x2 = np.min((width, x1 + np.max((0, obj["bbox"][2]))))
-            y2 = np.min((height, y1 + np.max((0, obj["bbox"][3]))))
-            if obj["area"] > 0 and x2 >= x1 and y2 >= y1:
+
+            x1 = np.max((0, obj["bboxes"][0]))
+            y1 = np.max((0, obj["bboxes"][1]))
+            x2 = np.min((width, x1 + np.max((0, obj["bboxes"][2]))))
+            y2 = np.min((height, y1 + np.max((0, obj["bboxes"][3]))))
+
+            if obj["areas"] > 0 and x2 >= x1 and y2 >= y1:
                 obj["clean_bbox"] = [x1, y1, x2, y2]
                 objs.append(obj)
 

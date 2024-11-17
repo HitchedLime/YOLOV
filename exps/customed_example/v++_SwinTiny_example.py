@@ -2,6 +2,9 @@ import os
 import torch.nn as nn
 import sys
 import torch
+
+from yolox.data.data_augment import Vid_Val_Transform
+
 sys.path.append("..")
 from exps.yolov.yolov_base import Exp as MyExp
 from loguru import logger
@@ -15,9 +18,9 @@ class Exp(MyExp):
         self.exp_name = os.path.split(os.path.realpath(__file__))[1].split(".")[0]
         self.backbone_name = 'Swin_Tiny'
         # Define yourself dataset path
-        self.data_dir = "/opt/dataset/OVIS" #set your dataset path
-        self.train_ann = "ovis_train.json" #set your train annotation file
-        self.val_ann = "ovis_train.json" #set your val annotation file
+        self.data_dir = "opt/dataset/OVIS" #set your dataset path
+        self.train_ann = "ovis_coco_format_train.json" #set your train annotation file
+        self.val_ann = "ovis_coco_format_train.json" #set your val annotation file
 
 
         self.warmup_epochs = 0
